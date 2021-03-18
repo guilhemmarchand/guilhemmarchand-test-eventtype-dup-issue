@@ -1,0 +1,41 @@
+version: '3.7'
+services:
+
+  # EventGen
+  eventgen:
+    image: guilhemmarchand/splunk-eventgen:latest
+    deploy:
+      resources:
+        limits:
+          cpus: '0.15'
+    restart: unless-stopped
+    user: 'root'
+    volumes:
+      - ./eventgen:/opt/eventgen
+    ports:
+      - "6379:6379"
+      - "9500:9500"
+    command: 'splunk_eventgen -v generate /opt/eventgen/default/eventgen.conf'
+
+  # Splunk
+  splunk:
+    image: splunk/splunk:latest
+    #image: splunk/splunk:7.3
+    #image: splunk/splunk:7.2
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+    hostname: splunk
+    ports:
+      - "8000:8000"
+      - "8089:8089"
+      - "9997:9997"
+      - "8088:8088"
+    environment:
+      SPLUNK_START_ARGS: "--accept-license"
+      SPLUNK_PASSWORD: "ch@ngeM3"
+    volumes:
+      - ./TA-config:/opt/splunk/etc/apps/TA-config
+      - ./TA-cisco_umbrella:/opt/splunk/etc/apps/TA-cisco_umbrella
+      - ./TA-0-TA-cisco_umbrella-SPAIN:/opt/splunk/etc/apps/TA-0-TA-cisco_umbrella-SPAIN
